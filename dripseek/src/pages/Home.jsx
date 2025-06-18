@@ -13,42 +13,78 @@ const Home = () => {
   const [tryOnResultUrl, setTryOnResultUrl] = useState('');
   const [tryOnLoading, setTryOnLoading] = useState(false);
   const [userImage, setUserImage] = useState(DEFAULT_USER_IMAGE);
+  const [clothes, setClothes] = useState([
+    { 
+      id: 1, 
+      img: 'https://m.media-amazon.com/images/I/61-jBuhtgZL._AC_UX569_.jpg', 
+      desc: 'Black T-Shirt' 
+    }
+  ]);
   const fileInputRef = useRef(null);
 
   const wrapperRef = useRef(null);
 
   const captureScreenshot = () => {
-  const video = document.querySelector('video');
-  if (!video) return;
+    const video = document.querySelector('video');
+    if (!video) {
+      console.error('No video element found');
+      return null;
+    }
 
-  const canvas = document.createElement('canvas');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  // Convert to base64 string
-  const imageData = canvas.toDataURL('image/jpeg');
-  return imageData;
-};
-  const clothes = [
-    { 
-      id: 1, 
-      img: 'https://m.media-amazon.com/images/I/61-jBuhtgZL._AC_UX569_.jpg', 
-      desc: 'Black T-Shirt' 
-    },
-    { 
-      id: 2, 
-      img: 'https://m.media-amazon.com/images/I/71RNJ5FUwbL._AC_UY550_.jpg', 
-      desc: 'Red Hoodie' 
-    },
-    { 
-      id: 3, 
-      img: 'https://m.media-amazon.com/images/I/71Wj-jQjBBL._AC_UY550_.jpg', 
-      desc: 'Denim Jacket' 
-    },
-  ];
+    console.log('Video dimensions:', video.videoWidth, 'x', video.videoHeight);
+    
+    // Create canvas with video dimensions
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;  // Fallback width if videoWidth is 0
+    canvas.height = video.videoHeight || 480; // Fallback height if videoHeight is 0
+    
+    // Draw video frame to canvas
+    const ctx = canvas.getContext('2d');
+    try {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      console.log('Successfully captured frame to canvas');
+    } catch (e) {
+      console.error('Error capturing video frame:', e);
+      return null;
+    }
+    
+    // Convert to base64 string (JPEG format, quality 0.9)
+    try {
+      const imageData = canvas.toDataURL('image/jpeg', 0.9);
+      
+      // Debug: Show image size and preview
+      console.log('Base64 image size:', Math.round(imageData.length / 1024), 'KB');
+      console.log('Base64 prefix:', imageData.substring(0, 50) + '...');
+      
+      // Debug: Create a preview element (will be removed after 5 seconds)
+      const debugPreview = document.createElement('div');
+      debugPreview.style.position = 'fixed';
+      debugPreview.style.bottom = '10px';
+      debugPreview.style.right = '10px';
+      debugPreview.style.zIndex = '9999';
+      debugPreview.style.border = '2px solid red';
+      debugPreview.style.background = 'white';
+      debugPreview.style.padding = '5px';
+      debugPreview.innerHTML = `
+        <p>Screenshot Preview (removed in 5s)</p>
+        <img src="${imageData}" style="max-width: 200px; max-height: 200px;" />
+      `;
+      document.body.appendChild(debugPreview);
+      setTimeout(() => document.body.removeChild(debugPreview), 5000);
+      
+      // Make sure the base64 string is properly formatted
+      if (!imageData.startsWith('data:image/jpeg;base64,')) {
+        console.error('Invalid base64 image format');
+        return null;
+      }
+      
+      return imageData;
+    } catch (e) {
+      console.error('Error converting canvas to base64:', e);
+      return null;
+    }
+  };
+  // Clothes are now managed in state
 
   const handleAddToCart = (item) => {
     if (!cartItems.find((i) => i.id === item.id)) {
@@ -108,32 +144,55 @@ const Home = () => {
     }
   };
 
-  const captureAndCropPerson = async () => {
-    const screenshot = captureScreenshot();
-    if (!screenshot) {
-      throw new Error('Failed to capture screenshot');
-    }
-    
-    try {
-      // If you have the sendToRekogCropPerson function implemented
-      return await sendToRekogCropPerson(screenshot);
-    } catch (e) {
-      console.error('Error cropping person:', e);
-      // Fall back to using the full screenshot
-      return screenshot;
-    }
-  };
+
 
   const handleDripSeekClick = async () => {
     setShowPanel(true);
     setActiveTab('items');
+    setTryOnLoading(true);
 
-    // capture screenshot + crop
     try {
+      // Capture screenshot with enhanced debugging
       const screenshot = captureScreenshot();
-      console.log("Screenshot captured:", screenshot ? screenshot.slice(0, 50) + '...' : 'failed');
+      if (!screenshot) throw new Error('Screenshot failed');
+      
+      // Extract the base64 data (remove the prefix)
+      const base64Data = screenshot.replace('data:image/jpeg;base64,', '');
+      console.log('Base64 data length:', base64Data.length);
+      
+      // Check if the base64 string contains valid characters
+      const isValidBase64 = /^[A-Za-z0-9+/=]+$/.test(base64Data);
+      console.log('Is valid base64 format:', isValidBase64);
+      
+      console.log("Screenshot captured, sending to API...");
+      const response = await sendToRekogCropPerson(screenshot);
+      console.log('API response:', response);
+      
+      // Check if response has the expected format
+      //if (response && response.result && Array.isArray(response.result)) {
+        // Format the clothes data from the API response
+        const newClothes = response.result.map((item, index) => {
+          const crawlData = item.crawling_result || {};
+          return {
+            id: index + 1,
+            img: crawlData.image_link || '',  // Use the image_link from crawling_result
+            desc: crawlData.title || '',      // Use the title from crawling_result
+            price: crawlData.price || '',     // Use the price from crawling_result
+            oldPrice: crawlData.old_price || '',
+            link: crawlData.link || ''        // Store the link for potential use
+          };
+        }).filter(item => item.img); // Only keep items with images
+        
+        // Update clothes array with the API results
+        if (newClothes.length > 0) {
+          setClothes(newClothes);
+          console.log('Found similar clothes:', newClothes.length);
+        }
+      //}
     } catch (e) {
-      console.error('Screenshot failed', e);
+      console.error('API request failed:', e);
+    } finally {
+      setTryOnLoading(false);
     }
   };
 
@@ -190,6 +249,8 @@ const Home = () => {
                   <img src={item.img} alt={item.desc} />
                   <div>
                     <p>{item.desc}</p>
+                    {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
+                    {item.oldPrice && <p style={{ color: '#666', fontSize: '0.8rem', textDecoration: 'line-through' }}>{item.oldPrice}</p>}
                     <div className="button-row">
                       <button className="chat-button" onClick={() => handleAddToCart(item)}>
                         Add to Cart

@@ -105,8 +105,46 @@ html, body {
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
 }
 
+.drip-panel-content {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 140px);
+}
+
+.search-results-section {
+  flex: 1;
+  min-height: 200px;
+  max-height: 50%;
+  overflow-y: auto;
+  padding-right: 5px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.try-on-section {
+  flex: 1;
+  min-height: 200px;
+  max-height: 50%;
+  overflow-y: auto;
+  padding-right: 5px;
+  padding-top: 10px;
+}
+
+.photo-upload-section {
+  padding-bottom: 15px;
+}
+
+.try-on-preview {
+  margin-top: 15px;
+}
+
 .clothes-grid {
-  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.cart-view {
+  height: calc(100vh - 140px);
   overflow-y: auto;
   padding-right: 5px;
 }
@@ -390,9 +428,15 @@ html, body {
 
 .cart-item-controls {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   margin-top: 8px;
+}
+
+.cart-item-controls > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .quantity-selector {
@@ -414,8 +458,11 @@ html, body {
 .size-guide {
   color: #00c2ff;
   font-size: 0.75rem;
-  margin: 4px 0 0 0;
+  margin: 8px 0 0 0;
   cursor: pointer;
+  display: block;
+  text-align: left;
+  order: 999;
 }
 
 .item-header {
@@ -428,7 +475,7 @@ html, body {
   background: transparent;
   border: none;
   color: #ff6b6b;
-  font-size: 1rem;
+  font-size: 1.5rem;
   cursor: pointer;
   padding: 0;
   margin-left: 8px;

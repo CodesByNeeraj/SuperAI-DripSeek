@@ -4,7 +4,7 @@ import { tryOn } from '../api/pixelcutTryOn';
 import { sendToRekogCropPerson } from '../api/rekogCrop';
 import { uploadToCloudinary } from'../api/uploadToCloudinary';
 import { tryOnStudio } from "../api/pixel"
-const DEFAULT_USER_IMAGE = 'https://amithbuckettest.s3.us-west-2.amazonaws.com/customer_picture/customer_picture.jpg';
+const DEFAULT_USER_IMAGE = 'https://res.cloudinary.com/dojig5luk/image/upload/v1750275979/h9lchhtlninxshu0sboa.jpg';
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const Home = () => {
@@ -323,61 +323,145 @@ const Home = () => {
 
           {/* Cart or Items */}
           {activeTab === 'items' ? (
-            <div className="clothes-grid">
-              {isClothesLoading ? (
-                // Loading screen while clothes are loading
-                <div className="loading-screen">
-                  <div className="loading-spinner">
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                  </div>
-                  <p className="loading-text">Finding your perfect style...</p>
-                </div>
-              ) : clothes.length > 0 ? (
-                // Display clothes when loaded
-                clothes.map((item) => (
-                  <div key={item.id} className="clothing-card">
-                    <img src={item.img} alt={item.desc} />
-                    <div>
-                      <p>{item.desc}</p>
-                      {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
-                      {item.oldPrice && <p style={{ color: '#ff0000', fontSize: '0.8rem', textDecoration: 'line-through' }}>{item.oldPrice}</p>}
-                      <p className="size-guide" onClick={handleSizeGuideClick}>
-                        <i>Click here for size guide</i>
-                      </p>
-                      <div className="button-row">
-                        <button className="chat-button" onClick={() => handleAddToCart(item)}>
-                          Add to Cart
-                        </button>
-                        <button className="chat-button" onClick={() => handleDripTry(item.img)}>
-                          DripTry
-                        </button>
+            <div className="drip-panel-content">
+              {/* Search Results Section */}
+              <div className="search-results-section">
+                <h4 style={{ color: '#00c2ff', marginBottom: '10px' }}>Search Results</h4>
+                <div className="clothes-grid">
+                  {isClothesLoading ? (
+                    // Loading screen while clothes are loading
+                    <div className="loading-screen">
+                      <div className="loading-spinner">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
                       </div>
+                      <p className="loading-text">Finding your perfect style...</p>
                     </div>
-                  </div>
-                ))
-              ) : (
-                // Show empty state when no clothes
-                <div className="no-results">
-                  <p>No styles found. Try capturing again.</p>
-                  <button 
-                    className="retry-button"
-                    onClick={handleDripSeekClick}
-                  >
-                    Try Again
-                  </button>
+                  ) : clothes.length > 0 ? (
+                    // Display clothes when loaded
+                    clothes.map((item) => (
+                      <div key={item.id} className="clothing-card">
+                        <img src={item.img} alt={item.desc} />
+                        <div>
+                          <p>{item.desc}</p>
+                          {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
+                          {item.oldPrice && <p style={{ color: '#ff0000', fontSize: '0.8rem', textDecoration: 'line-through' }}>{item.oldPrice}</p>}
+                          <div className="button-row">
+                            <button className="chat-button" onClick={() => handleAddToCart(item)}>
+                              Add to Cart
+                            </button>
+                            <button className="chat-button" onClick={() => handleDripTry(item.img)}>
+                              DripTry
+                            </button>
+                          </div>
+                          <p className="size-guide" onClick={handleSizeGuideClick}>
+                            <i>Click here for size guide</i>
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    // Show empty state when no clothes
+                    <div className="no-results">
+                      <p>No styles found. Try capturing again.</p>
+                      <button 
+                        className="retry-button"
+                        onClick={handleDripSeekClick}
+                      >
+                        Try Again
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Try-On Section */}
+              <div className="try-on-section">
+                {/* Image Upload Section */}
+                <div className="photo-upload-section">
+                  <h4 style={{ color: '#00c2ff', marginBottom: '10px' }}>Your Photo</h4>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <button 
+                      className="chat-button" 
+                      onClick={() => fileInputRef.current.click()}
+                      style={{ flex: 1 }}
+                    >
+                      Upload New Photo
+                    </button>
+                    <button 
+                      className="chat-button" 
+                      onClick={() => setUserImage(DEFAULT_USER_IMAGE)}
+                      style={{ flex: 1 }}
+                    >
+                      Use Default
+                    </button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                  <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                    <img 
+                      src={userImage} 
+                      alt="Your photo" 
+                      style={{ 
+                        maxWidth: '100%', 
+                        height: '120px',
+                        borderRadius: '6px',
+                        border: '1px solid rgba(255, 255, 255, 0.2)'
+                      }} 
+                    />
+                    {userImage === DEFAULT_USER_IMAGE && (
+                      <p style={{ color: '#ccc', fontSize: '0.8rem', marginTop: '5px' }}>
+                        Using default model image
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {tryOnLoading && (
+                  <div style={{ color: '#00c2ff', marginTop: '20px', textAlign: 'center' }}>
+                    <p>Generating Try-On...</p>
+                  </div>
+                )}
+
+                {tryOnResultUrl && (
+                  <div className="try-on-preview">
+                    <h4 style={{ color: '#00c2ff' }}>Try-On Preview:</h4>
+                    
+                    <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                      <img
+                        src={tryOnResultUrl}
+                        alt="Try-on result"
+                        style={{
+                          maxWidth: '100%',
+                          height: 'auto',
+                          borderRadius: '10px',
+                          border: '1px solid #00c2ff',
+                          boxShadow: '0 0 15px rgba(0, 194, 255, 0.3)',
+                        }}
+                      />
+                    </div>
+                    
+                    <p style={{ color: '#ccc', fontSize: '0.8rem', marginTop: '5px', textAlign: 'center' }}>
+                      DripSeek Demo Mode
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="clothes-grid">
+            <div className="cart-view">
               <button className="back-to-items-button" onClick={() => setActiveTab('items')}>
                 ← Back to Items
               </button>
@@ -416,9 +500,6 @@ const Home = () => {
                                 <option key={size} value={size}>{size}</option>
                               ))}
                             </select>
-                            <p className="size-guide" onClick={handleSizeGuideClick}>
-                              <i>Click here for size guide</i>
-                            </p>
                           </div>
                           <div className="quantity-selector">
                             <label htmlFor={`qty-${item.id}`} style={{ color: '#ccc', fontSize: '0.85rem', marginRight: '8px' }}>
@@ -433,6 +514,9 @@ const Home = () => {
                               className="quantity-input"
                             />
                           </div>
+                          <p className="size-guide" onClick={handleSizeGuideClick}>
+                            <i>Click here for size guide</i>
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -453,86 +537,6 @@ const Home = () => {
                 </>
               )}
             </div>
-          )}
-
-          {/* Try-On Results Section */}
-          {activeTab === 'items' && (
-            <>
-              {/* Image Upload Section */}
-              <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '15px' }}>
-                <h4 style={{ color: '#00c2ff', marginBottom: '10px' }}>Your Photo</h4>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <button 
-                    className="chat-button" 
-                    onClick={() => fileInputRef.current.click()}
-                    style={{ flex: 1 }}
-                  >
-                    Upload New Photo
-                  </button>
-                  <button 
-                    className="chat-button" 
-                    onClick={() => setUserImage(DEFAULT_USER_IMAGE)}
-                    style={{ flex: 1 }}
-                  >
-                    Use Default
-                  </button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleImageUpload}
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                  />
-                </div>
-                <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                  <img 
-                    src={userImage} 
-                    alt="Your photo" 
-                    style={{ 
-                      maxWidth: '100%', 
-                      height: '120px',
-                      borderRadius: '6px',
-                      border: '1px solid rgba(255, 255, 255, 0.2)'
-                    }} 
-                  />
-                  {userImage === DEFAULT_USER_IMAGE && (
-                    <p style={{ color: '#ccc', fontSize: '0.8rem', marginTop: '5px' }}>
-                      Using default model image
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {tryOnLoading && (
-                <div style={{ color: '#00c2ff', marginTop: '20px', textAlign: 'center' }}>
-                  <p>Generating Try-On...</p>
-                </div>
-              )}
-
-              {tryOnResultUrl && (
-                <div style={{ marginTop: '20px' }}>
-                  <h4 style={{ color: '#00c2ff' }}>Try-On Preview:</h4>
-                  
-                  <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-                    <img
-                      src={tryOnResultUrl}
-                      alt="Try-on result"
-                      style={{
-                        maxWidth: '100%',
-                        height: 'auto',
-                        borderRadius: '10px',
-                        border: '1px solid #00c2ff',
-                        boxShadow: '0 0 15px rgba(0, 194, 255, 0.3)',
-                      }}
-                    />
-                  </div>
-                  
-                  <p style={{ color: '#ccc', fontSize: '0.8rem', marginTop: '5px', textAlign: 'center' }}>
-                    DripSeek Demo Mode
-                  </p>
-                </div>
-              )}
-            </>
           )}
 
 

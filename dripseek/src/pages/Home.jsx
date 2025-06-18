@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import '../css/Home.css';
 import { tryOn } from '../api/pixelcutTryOn';
 import { sendToRekogCropPerson } from '../api/rekogCrop';
-
+import { uploadToCloudinary } from'../api/uploadToCloudinary';
 const DEFAULT_USER_IMAGE = 'https://amithbuckettest.s3.us-west-2.amazonaws.com/customer_picture/customer_picture.jpg';
 
 const Home = () => {
@@ -56,16 +56,18 @@ const Home = () => {
     }
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUserImage(e.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const handleImageUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  try {
+    const imageUrl = await uploadToCloudinary(file);
+    setUserImage(imageUrl); // set direct URL now
+  } catch (err) {
+    console.error('Image upload failed:', err);
+    alert('Failed to upload image.');
+  }
+};
 
   // This helper function is now in pixelcutTryOn.js
 
@@ -91,7 +93,7 @@ const Home = () => {
       alert('Failed to generate try-on: ' + e.message);
       
       // Fallback to showing the garment image if API fails
-      setTryOnResultUrl(garmentUrl);
+      // setTryOnResultUrl(garmentUrl);
     } finally {
       setTryOnLoading(false);
     }

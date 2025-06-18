@@ -125,13 +125,39 @@ const Home = () => {
   const handleDripSeekClick = async () => {
     setShowPanel(true);
     setActiveTab('items');
+    setTryOnLoading(true);
 
-    // capture screenshot + crop
     try {
       const screenshot = captureScreenshot();
-      console.log("Screenshot captured:", screenshot ? screenshot.slice(0, 50) + '...' : 'failed');
+      if (!screenshot) throw new Error('Screenshot failed');
+      
+      console.log("Screenshot captured, sending to API...");
+      const response = await sendToRekogCropPerson(screenshot);
+      
+      // Check if response has the expected format
+      if (response && response.result && Array.isArray(response.result)) {
+        // Format the clothes data from the API response
+        const newClothes = response.result.map((item, index) => {
+          const crawlData = item.crawling_result || {};
+          return {
+            id: index + 1,
+            img: item.imageUrl || crawlData.image_link || '',
+            desc: crawlData.title || `Item ${index + 1}`,
+            price: crawlData.price || '',
+            oldPrice: crawlData.old_price || ''
+          };
+        }).filter(item => item.img); // Only keep items with images
+        
+        // Update clothes array with the API results
+        if (newClothes.length > 0) {
+          setClothes(newClothes);
+          console.log('Found similar clothes:', newClothes.length);
+        }
+      }
     } catch (e) {
-      console.error('Screenshot failed', e);
+      console.error('API request failed:', e);
+    } finally {
+      setTryOnLoading(false);
     }
   };
 
@@ -188,6 +214,8 @@ const Home = () => {
                   <img src={item.img} alt={item.desc} />
                   <div>
                     <p>{item.desc}</p>
+                    {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
+                    {item.oldPrice && <p style={{ color: '#666', fontSize: '0.8rem', textDecoration: 'line-through' }}>{item.oldPrice}</p>}
                     <div className="button-row">
                       <button className="chat-button" onClick={() => handleAddToCart(item)}>
                         Add to Cart

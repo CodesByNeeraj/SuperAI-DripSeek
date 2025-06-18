@@ -5,17 +5,21 @@ import { sendToRekogCropPerson } from '../api/rekogCrop';
 import { uploadToCloudinary } from'../api/uploadToCloudinary';
 import { tryOnStudio } from "../api/pixel"
 const DEFAULT_USER_IMAGE = 'https://amithbuckettest.s3.us-west-2.amazonaws.com/customer_picture/customer_picture.jpg';
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const Home = () => {
   const [showPanel, setShowPanel] = useState(false);
   const [cartItems, setCartItems] = useState([]);
+  const [itemSizes, setItemSizes] = useState({});
+  const [itemQuantities, setItemQuantities] = useState({});
   const [chatInput, setChatInput] = useState('');
   const [activeTab, setActiveTab] = useState('items');
   const [tryOnResultUrl, setTryOnResultUrl] = useState('');
   const [tryOnLoading, setTryOnLoading] = useState(false);
   const [userImage, setUserImage] = useState(DEFAULT_USER_IMAGE);
   const [isClothesLoading, setIsClothesLoading] = useState(false); 
-  const [clothes, setClothes] = useState([]); 
+  const [clothes, setClothes] = useState([]);
+  const [cartNotification, setCartNotification] = useState('');
   const fileInputRef = useRef(null);
 
   const wrapperRef = useRef(null);
@@ -85,7 +89,78 @@ const Home = () => {
   const handleAddToCart = (item) => {
     if (!cartItems.find((i) => i.id === item.id)) {
       setCartItems([...cartItems, item]);
+      // Set default size to 'M' when adding to cart
+      setItemSizes(prev => ({
+        ...prev,
+        [item.id]: 'M'
+      }));
+      
+      // Set default quantity to 1
+      setItemQuantities(prev => ({
+        ...prev,
+        [item.id]: 1
+      }));
+      
+      // Show notification
+      setCartNotification(`${item.desc} added to cart!`);
+      
+      // Clear notification after 3 seconds
+      setTimeout(() => {
+        setCartNotification('');
+      }, 3000);
     }
+  };
+  
+  const handleSizeChange = (itemId, newSize) => {
+    setItemSizes(prev => ({
+      ...prev,
+      [itemId]: newSize
+    }));
+  };
+  
+  const handleQuantityChange = (itemId, newQuantity) => {
+    setItemQuantities(prev => ({
+      ...prev,
+      [itemId]: Math.max(1, parseInt(newQuantity) || 1)
+    }));
+  };
+  
+  const handleSizeGuideClick = () => {
+    setCartNotification('Size guide will be available soon!');
+    setTimeout(() => setCartNotification(''), 3000);
+  };
+  
+  const handleRemoveFromCart = (itemId) => {
+    setCartItems(cartItems.filter(item => item.id !== itemId));
+    setCartNotification('Item removed from cart');
+    setTimeout(() => setCartNotification(''), 3000);
+  };
+  
+  const handleBuyNow = (item) => {
+    setCartNotification(`Processing purchase for ${item.desc}...`);
+    // In a real app, this would redirect to checkout with just this item
+    setTimeout(() => {
+      setCartNotification('Purchase completed!');
+      setTimeout(() => setCartNotification(''), 2000);
+    }, 1500);
+  };
+  
+  const handleCheckout = () => {
+    setCartNotification('Processing your order...');
+    // In a real app, this would redirect to checkout with all items
+    setTimeout(() => {
+      setCartNotification('Order completed!');
+      setTimeout(() => setCartNotification(''), 2000);
+    }, 1500);
+  };
+  
+  const calculateTotal = () => {
+    return cartItems.reduce((total, item) => {
+      // Extract numeric value from price string (e.g., "$29.99" -> 29.99)
+      const price = parseFloat(item.price?.replace(/[^0-9.]/g, '')) || 0;
+      const quantity = itemQuantities[item.id] || 1;
+      return total + (price * quantity);
+    }, 0).toFixed(2);
   };
 
   const handleImageUpload = async (e) => {
@@ -238,6 +313,13 @@ const Home = () => {
               🛒 DripCart
             </button>
           </div>
+          
+          {/* Cart Notification */}
+          {cartNotification && (
+            <div className="cart-notification">
+              {cartNotification}
+            </div>
+          )}
 
           {/* Cart or Items */}
           {activeTab === 'items' ? (
@@ -266,7 +348,10 @@ const Home = () => {
                     <div>
                       <p>{item.desc}</p>
                       {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
-                      {item.oldPrice && <p style={{ color: '#666', fontSize: '0.8rem', textDecoration: 'line-through' }}>{item.oldPrice}</p>}
+                      {item.oldPrice && <p style={{ color: '#ff0000', fontSize: '0.8rem', textDecoration: 'line-through' }}>{item.oldPrice}</p>}
+                      <p className="size-guide" onClick={handleSizeGuideClick}>
+                        <i>Click here for size guide</i>
+                      </p>
                       <div className="button-row">
                         <button className="chat-button" onClick={() => handleAddToCart(item)}>
                           Add to Cart
@@ -300,14 +385,72 @@ const Home = () => {
               {cartItems.length === 0 ? (
                 <p style={{ color: '#ccc' }}>Your cart is empty.</p>
               ) : (
-                cartItems.map((item) => (
-                  <div key={item.id} className="clothing-card">
-                    <img src={item.img} alt={item.desc} />
-                    <div>
-                      <p>{item.desc}</p>
+                <>
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="clothing-card">
+                      <img src={item.img} alt={item.desc} />
+                      <div style={{ width: '100%' }}>
+                        <div className="item-header">
+                          <p>{item.desc}</p>
+                          <button 
+                            className="remove-item-btn" 
+                            onClick={() => handleRemoveFromCart(item.id)}
+                            title="Remove from cart"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                        {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
+                        <div className="cart-item-controls">
+                          <div className="size-selector">
+                            <label htmlFor={`size-${item.id}`} style={{ color: '#ccc', fontSize: '0.85rem', marginRight: '8px' }}>
+                              Size:
+                            </label>
+                            <select 
+                              id={`size-${item.id}`}
+                              value={itemSizes[item.id] || 'M'} 
+                              onChange={(e) => handleSizeChange(item.id, e.target.value)}
+                              className="size-dropdown"
+                            >
+                              {SIZES.map(size => (
+                                <option key={size} value={size}>{size}</option>
+                              ))}
+                            </select>
+                            <p className="size-guide" onClick={handleSizeGuideClick}>
+                              <i>Click here for size guide</i>
+                            </p>
+                          </div>
+                          <div className="quantity-selector">
+                            <label htmlFor={`qty-${item.id}`} style={{ color: '#ccc', fontSize: '0.85rem', marginRight: '8px' }}>
+                              Qty:
+                            </label>
+                            <input
+                              id={`qty-${item.id}`}
+                              type="number"
+                              min="1"
+                              value={itemQuantities[item.id] || 1}
+                              onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                              className="quantity-input"
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                  ))}
+                  
+                  <div className="checkout-section">
+                    <div className="total-price">
+                      <span>Total:</span>
+                      <span>${calculateTotal()}</span>
+                    </div>
+                    <button 
+                      className="checkout-button"
+                      onClick={handleCheckout}
+                    >
+                      Checkout
+                    </button>
                   </div>
-                ))
+                </>
               )}
             </div>
           )}

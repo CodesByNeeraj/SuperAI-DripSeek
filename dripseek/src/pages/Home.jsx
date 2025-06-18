@@ -9,6 +9,21 @@ const Home = () => {
 
   const wrapperRef = useRef(null);
 
+  const captureScreenshot = () => {
+  const video = document.querySelector('video');
+  if (!video) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // Convert to base64 string
+  const imageData = canvas.toDataURL('image/jpeg');
+  return imageData;
+};
   const clothes = [
     { id: 1, img: 'https://via.placeholder.com/60x80', desc: 'Black T-Shirt' },
     { id: 2, img: 'https://via.placeholder.com/60x80', desc: 'Red Hoodie' },
@@ -29,6 +44,16 @@ const Home = () => {
     }
   };
 
+  const handleDripSeekClick = () => {
+  setShowPanel(true);
+  setActiveTab('items');
+
+  const screenshot = captureScreenshot();
+
+  // TODO: Send to backend (this part is optional for now)
+  console.log("Screenshot captured:", screenshot.slice(0, 50) + '...'); // Just for debugging
+};
+
   return (
     <div className="home-container">
       <div className="video-wrapper" ref={wrapperRef}>
@@ -38,12 +63,9 @@ const Home = () => {
         </video>
 
         {/* DripSeek Button */}
-        <button
-          className="dripseek-button"
-          onClick={() => {
-            setShowPanel(true);
-            setActiveTab('items');
-          }}
+        <button 
+            className='dripseek-button'
+            onClick  = {handleDripSeekClick}
         >
           <span className="eye-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">

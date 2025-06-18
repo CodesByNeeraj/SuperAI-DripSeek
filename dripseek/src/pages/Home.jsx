@@ -14,13 +14,8 @@ const Home = () => {
   const [tryOnResultUrl, setTryOnResultUrl] = useState('');
   const [tryOnLoading, setTryOnLoading] = useState(false);
   const [userImage, setUserImage] = useState(DEFAULT_USER_IMAGE);
-  const [clothes, setClothes] = useState([
-    { 
-      id: 1, 
-      img: 'https://m.media-amazon.com/images/I/61-jBuhtgZL._AC_UX569_.jpg', 
-      desc: 'Black T-Shirt' 
-    }
-  ]);
+  const [isClothesLoading, setIsClothesLoading] = useState(false); 
+  const [clothes, setClothes] = useState([]); 
   const fileInputRef = useRef(null);
 
   const wrapperRef = useRef(null);
@@ -133,6 +128,7 @@ const Home = () => {
       // setTryOnResultUrl(garmentUrl);
     } finally {
       setTryOnLoading(false);
+      
     }
   };
 
@@ -151,6 +147,7 @@ const Home = () => {
     setShowPanel(true);
     setActiveTab('items');
     setTryOnLoading(true);
+    setIsClothesLoading(true); 
 
     try {
       // Capture screenshot with enhanced debugging
@@ -186,14 +183,14 @@ const Home = () => {
         
         // Update clothes array with the API results
         if (newClothes.length > 0) {
-          setClothes(newClothes);
-          console.log('Found similar clothes:', newClothes.length);
-        }
+        setClothes(newClothes);
+      }
       //}
     } catch (e) {
       console.error('API request failed:', e);
     } finally {
       setTryOnLoading(false);
+      setIsClothesLoading(false);
     }
   };
 
@@ -245,24 +242,54 @@ const Home = () => {
           {/* Cart or Items */}
           {activeTab === 'items' ? (
             <div className="clothes-grid">
-              {clothes.map((item) => (
-                <div key={item.id} className="clothing-card">
-                  <img src={item.img} alt={item.desc} />
-                  <div>
-                    <p>{item.desc}</p>
-                    {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
-                    {item.oldPrice && <p style={{ color: '#666', fontSize: '0.8rem', textDecoration: 'line-through' }}>{item.oldPrice}</p>}
-                    <div className="button-row">
-                      <button className="chat-button" onClick={() => handleAddToCart(item)}>
-                        Add to Cart
-                      </button>
-                      <button className="chat-button" onClick={() => handleDripTry(item.img)}>
-                        DripTry
-                      </button>
+              {isClothesLoading ? (
+                // Loading screen while clothes are loading
+                <div className="loading-screen">
+                  <div className="loading-spinner">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                  </div>
+                  <p className="loading-text">Finding your perfect style...</p>
+                </div>
+              ) : clothes.length > 0 ? (
+                // Display clothes when loaded
+                clothes.map((item) => (
+                  <div key={item.id} className="clothing-card">
+                    <img src={item.img} alt={item.desc} />
+                    <div>
+                      <p>{item.desc}</p>
+                      {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
+                      {item.oldPrice && <p style={{ color: '#666', fontSize: '0.8rem', textDecoration: 'line-through' }}>{item.oldPrice}</p>}
+                      <div className="button-row">
+                        <button className="chat-button" onClick={() => handleAddToCart(item)}>
+                          Add to Cart
+                        </button>
+                        <button className="chat-button" onClick={() => handleDripTry(item.img)}>
+                          DripTry
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                // Show empty state when no clothes
+                <div className="no-results">
+                  <p>No styles found. Try capturing again.</p>
+                  <button 
+                    className="retry-button"
+                    onClick={handleDripSeekClick}
+                  >
+                    Try Again
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
           ) : (
             <div className="clothes-grid">

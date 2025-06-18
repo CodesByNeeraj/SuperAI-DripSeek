@@ -3,6 +3,7 @@ import '../css/Home.css';
 import { tryOn } from '../api/pixelcutTryOn';
 import { sendToRekogCropPerson } from '../api/rekogCrop';
 import { uploadToCloudinary } from'../api/uploadToCloudinary';
+import { tryOnStudio } from "../api/pixel"
 const DEFAULT_USER_IMAGE = 'https://amithbuckettest.s3.us-west-2.amazonaws.com/customer_picture/customer_picture.jpg';
 
 const Home = () => {
@@ -116,12 +117,12 @@ const Home = () => {
       const personImage = userImage;
       
       console.log('Starting try-on with Pixelcut API...');
-      console.log('Using person image:', personImage === DEFAULT_USER_IMAGE ? 'Default S3 image' : 'User uploaded image');
+      // console.log('Using person image:', personImage === DEFAULT_USER_IMAGE ? 'Default S3 image' : 'User uploaded image');
       
       // Call the actual API
-      const blob = await tryOn(personImage, garmentUrl);
-      const resultUrl = URL.createObjectURL(blob);
-      setTryOnResultUrl(resultUrl);
+      const imageUrl = await tryOnStudio(personImage, garmentUrl);
+
+      setTryOnResultUrl(imageUrl);
       
       console.log('Try-on completed successfully');
     } catch (e) {

@@ -1,11 +1,19 @@
 import React, { useRef, useState } from 'react';
 import '../css/Home.css';
+import { tryOn } from '../api/pixelcutTryOn';
+import { sendToRekogCropPerson } from '../api/rekogCrop';
+
+const DEFAULT_USER_IMAGE = 'https://amithbuckettest.s3.us-west-2.amazonaws.com/customer_picture/customer_picture.jpg';
 
 const Home = () => {
   const [showPanel, setShowPanel] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [activeTab, setActiveTab] = useState('items');
+  const [tryOnResultUrl, setTryOnResultUrl] = useState('');
+  const [tryOnLoading, setTryOnLoading] = useState(false);
+  const [userImage, setUserImage] = useState(DEFAULT_USER_IMAGE);
+  const fileInputRef = useRef(null);
 
   const wrapperRef = useRef(null);
 
@@ -25,9 +33,21 @@ const Home = () => {
   return imageData;
 };
   const clothes = [
-    { id: 1, img: 'https://via.placeholder.com/60x80', desc: 'Black T-Shirt' },
-    { id: 2, img: 'https://via.placeholder.com/60x80', desc: 'Red Hoodie' },
-    { id: 3, img: 'https://via.placeholder.com/60x80', desc: 'Denim Jacket' },
+    { 
+      id: 1, 
+      img: 'https://m.media-amazon.com/images/I/61-jBuhtgZL._AC_UX569_.jpg', 
+      desc: 'Black T-Shirt' 
+    },
+    { 
+      id: 2, 
+      img: 'https://m.media-amazon.com/images/I/71RNJ5FUwbL._AC_UY550_.jpg', 
+      desc: 'Red Hoodie' 
+    },
+    { 
+      id: 3, 
+      img: 'https://m.media-amazon.com/images/I/71Wj-jQjBBL._AC_UY550_.jpg', 
+      desc: 'Denim Jacket' 
+    },
   ];
 
   const handleAddToCart = (item) => {
@@ -35,6 +55,48 @@ const Home = () => {
       setCartItems([...cartItems, item]);
     }
   };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUserImage(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // This helper function is now in pixelcutTryOn.js
+
+  const handleDripTry = async (garmentUrl) => {
+    setTryOnLoading(true);
+    setTryOnResultUrl('');
+
+    try {
+      // Get the person image (always use userImage since we have a default)
+      const personImage = userImage;
+      
+      console.log('Starting try-on with Pixelcut API...');
+      console.log('Using person image:', personImage === DEFAULT_USER_IMAGE ? 'Default S3 image' : 'User uploaded image');
+      
+      // Call the actual API
+      const blob = await tryOn(personImage, garmentUrl);
+      const resultUrl = URL.createObjectURL(blob);
+      setTryOnResultUrl(resultUrl);
+      
+      console.log('Try-on completed successfully');
+    } catch (e) {
+      console.error('Try-on error:', e);
+      alert('Failed to generate try-on: ' + e.message);
+      
+      // Fallback to showing the garment image if API fails
+      setTryOnResultUrl(garmentUrl);
+    } finally {
+      setTryOnLoading(false);
+    }
+  };
+
 
   const handleChatSubmit = (e) => {
     e.preventDefault();
@@ -44,15 +106,34 @@ const Home = () => {
     }
   };
 
-  const handleDripSeekClick = () => {
-  setShowPanel(true);
-  setActiveTab('items');
+  const captureAndCropPerson = async () => {
+    const screenshot = captureScreenshot();
+    if (!screenshot) {
+      throw new Error('Failed to capture screenshot');
+    }
+    
+    try {
+      // If you have the sendToRekogCropPerson function implemented
+      return await sendToRekogCropPerson(screenshot);
+    } catch (e) {
+      console.error('Error cropping person:', e);
+      // Fall back to using the full screenshot
+      return screenshot;
+    }
+  };
 
-  const screenshot = captureScreenshot();
+  const handleDripSeekClick = async () => {
+    setShowPanel(true);
+    setActiveTab('items');
 
-  // TODO: Send to backend (this part is optional for now)
-  console.log("Screenshot captured:", screenshot.slice(0, 50) + '...'); // Just for debugging
-};
+    // capture screenshot + crop
+    try {
+      const screenshot = captureScreenshot();
+      console.log("Screenshot captured:", screenshot ? screenshot.slice(0, 50) + '...' : 'failed');
+    } catch (e) {
+      console.error('Screenshot failed', e);
+    }
+  };
 
   return (
     <div className="home-container">
@@ -111,7 +192,7 @@ const Home = () => {
                       <button className="chat-button" onClick={() => handleAddToCart(item)}>
                         Add to Cart
                       </button>
-                      <button className="chat-button" onClick={() => handleAddToCart(item)}>
+                      <button className="chat-button" onClick={() => handleDripTry(item.img)}>
                         DripTry
                       </button>
                     </div>
@@ -140,7 +221,88 @@ const Home = () => {
             </div>
           )}
 
-          {/* Chat Box */}
+          {/* Try-On Results Section */}
+          {activeTab === 'items' && (
+            <>
+              {/* Image Upload Section */}
+              <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '15px' }}>
+                <h4 style={{ color: '#00c2ff', marginBottom: '10px' }}>Your Photo</h4>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <button 
+                    className="chat-button" 
+                    onClick={() => fileInputRef.current.click()}
+                    style={{ flex: 1 }}
+                  >
+                    Upload New Photo
+                  </button>
+                  <button 
+                    className="chat-button" 
+                    onClick={() => setUserImage(DEFAULT_USER_IMAGE)}
+                    style={{ flex: 1 }}
+                  >
+                    Use Default
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                  />
+                </div>
+                <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                  <img 
+                    src={userImage} 
+                    alt="Your photo" 
+                    style={{ 
+                      maxWidth: '100%', 
+                      height: '120px',
+                      borderRadius: '6px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }} 
+                  />
+                  {userImage === DEFAULT_USER_IMAGE && (
+                    <p style={{ color: '#ccc', fontSize: '0.8rem', marginTop: '5px' }}>
+                      Using default model image
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {tryOnLoading && (
+                <div style={{ color: '#00c2ff', marginTop: '20px', textAlign: 'center' }}>
+                  <p>Generating Try-On...</p>
+                </div>
+              )}
+
+              {tryOnResultUrl && (
+                <div style={{ marginTop: '20px' }}>
+                  <h4 style={{ color: '#00c2ff' }}>Try-On Preview:</h4>
+                  
+                  <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                    <img
+                      src={tryOnResultUrl}
+                      alt="Try-on result"
+                      style={{
+                        maxWidth: '100%',
+                        height: 'auto',
+                        borderRadius: '10px',
+                        border: '1px solid #00c2ff',
+                        boxShadow: '0 0 15px rgba(0, 194, 255, 0.3)',
+                      }}
+                    />
+                  </div>
+                  
+                  <p style={{ color: '#ccc', fontSize: '0.8rem', marginTop: '5px', textAlign: 'center' }}>
+                    DripSeek Demo Mode
+                  </p>
+                </div>
+              )}
+            </>
+          )}
+
+
+          {/* Chat Box
           {activeTab === 'items' && (
             <form className="dripchat-input-box" onSubmit={handleChatSubmit}>
               <input
@@ -151,7 +313,7 @@ const Home = () => {
               />
               <button type="submit">Send</button>
             </form>
-          )}
+        //   )} */}
         </div>
       </div>
     </div>

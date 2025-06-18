@@ -5,7 +5,7 @@ const Home = () => {
   const [showPanel, setShowPanel] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [chatInput, setChatInput] = useState('');
-  const [activeTab, setActiveTab] = useState('items'); // 'items' | 'cart'
+  const [activeTab, setActiveTab] = useState('items');
 
   const wrapperRef = useRef(null);
 
@@ -24,7 +24,7 @@ const Home = () => {
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (chatInput.trim() !== '') {
-      console.log("Query:", chatInput);
+      console.log("User Query:", chatInput);
       setChatInput('');
     }
   };
@@ -33,15 +33,18 @@ const Home = () => {
     <div className="home-container">
       <div className="video-wrapper" ref={wrapperRef}>
         <video className="video" autoPlay muted loop controls>
-            <source src="/video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-            </video>
-        
-        {/* Always-visible DripSeek Button */}
-        <button className="dripseek-button" onClick={() => {
-          setShowPanel(true);
-          setActiveTab('items');
-        }}>
+          <source src="/video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* DripSeek Button */}
+        <button
+          className="dripseek-button"
+          onClick={() => {
+            setShowPanel(true);
+            setActiveTab('items');
+          }}
+        >
           <span className="eye-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 4.5C7.58 4.5 3.67 7.26 2 12c1.67 4.74 5.58 7.5 10 7.5s8.33-2.76 10-7.5c-1.67-4.74-5.58-7.5-10-7.5zm0 13c-3.04 0-5.5-2.46-5.5-5.5S8.96 6.5 12 6.5s5.5 2.46 5.5 5.5S15.04 17.5 12 17.5zM12 9c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3z"/>
@@ -50,31 +53,31 @@ const Home = () => {
           <span className="dripseek-text">DripSeek</span>
         </button>
 
-        {/*arrow button to open the panel*/}
+        {/* Arrow Toggle */}
         <button
-            className="toggle-arrow-button"
-            onClick={() => setShowPanel(prev => !prev)}
-            title="Toggle Panel"
+          className="toggle-arrow-button"
+          onClick={() => setShowPanel((prev) => !prev)}
+          title="Toggle Panel"
         >
-            {showPanel ? '<' : '>'}
+          {showPanel ? '<' : '>'}
         </button>
-        
 
-
-        {/* Left Overlay Panel */}
+        {/* Overlay Panel */}
         <div className={`drip-panel ${showPanel ? 'open' : ''}`}>
           <div className="panel-header">
             <span className="powered-label">Powered by <strong>DripSeek AI</strong></span>
-            <button className="close-button" onClick={() => setShowPanel(false)}>&lt;</button>
-            <button className="cart-button" onClick={() => {
-              setShowPanel(true);
-              setActiveTab('cart');
-            }}>
+            <button
+              className="cart-button"
+              onClick={() => {
+                setActiveTab('cart');
+                setShowPanel(true);
+              }}
+            >
               🛒 DripCart
             </button>
           </div>
 
-          {/* Content based on tab */}
+          {/* Cart or Items */}
           {activeTab === 'items' ? (
             <div className="clothes-grid">
               {clothes.map((item) => (
@@ -82,15 +85,23 @@ const Home = () => {
                   <img src={item.img} alt={item.desc} />
                   <div>
                     <p>{item.desc}</p>
-                    <button className="chat-button" onClick={() => handleAddToCart(item)}>
-                      Add to Cart
-                    </button>
+                    <div className="button-row">
+                      <button className="chat-button" onClick={() => handleAddToCart(item)}>
+                        Add to Cart
+                      </button>
+                      <button className="chat-button" onClick={() => handleAddToCart(item)}>
+                        DripTry
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="clothes-grid">
+              <button className="back-to-items-button" onClick={() => setActiveTab('items')}>
+                ← Back to Items
+              </button>
               <h4 style={{ color: '#fff', marginBottom: '10px' }}>Your DripCart</h4>
               {cartItems.length === 0 ? (
                 <p style={{ color: '#ccc' }}>Your cart is empty.</p>
@@ -107,7 +118,7 @@ const Home = () => {
             </div>
           )}
 
-          {/* DripChat Input (shown only in 'items' view) */}
+          {/* Chat Box */}
           {activeTab === 'items' && (
             <form className="dripchat-input-box" onSubmit={handleChatSubmit}>
               <input

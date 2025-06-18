@@ -32,7 +32,6 @@ html, body {
   border: none;
 }
 
-/* Glowing DripSeek Button */
 .dripseek-button {
   position: absolute;
   top: 20px;
@@ -69,7 +68,26 @@ html, body {
   letter-spacing: 0.5px;
 }
 
-/* Left Panel */
+.toggle-arrow-button {
+  position: absolute;
+  top: 33px;
+  left: 170px; /* adjust as needed next to DripSeek */
+  background: transparent;
+  border: none;
+  color: #00e6ff;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000;
+  padding: 0;
+  line-height: 1;
+}
+
+.toggle-arrow-button:hover {
+  color: #00c2ff;
+}
+
+
 .drip-panel {
   position: absolute;
   top: 0;
@@ -91,7 +109,6 @@ html, body {
   left: 0;
 }
 
-/* Top of overlay */
 .panel-header {
   display: flex;
   align-items: center;
@@ -110,8 +127,6 @@ html, body {
   color: #00e6ff;
 }
 
-/* Overlay Buttons */
-.close-button,
 .cart-button {
   background-color: #00c2ff;
   color: black;
@@ -123,7 +138,6 @@ html, body {
   font-size: 0.75rem;
 }
 
-/* Item List */
 .clothes-grid {
   display: flex;
   flex-direction: column;
@@ -151,7 +165,11 @@ html, body {
   color: #fff;
 }
 
-/* Add to Cart */
+.button-row {
+  display: flex;
+  gap: 15px;
+}
+
 .chat-button {
   margin-top: 4px;
   background-color: #00c2ff;
@@ -164,7 +182,22 @@ html, body {
   font-size: 0.85rem;
 }
 
-/* DripChat Input */
+.back-to-items-button {
+  background: transparent;
+  color: #00e6ff;
+  font-size: 14px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.back-to-items-button:hover {
+  color: #00c2ff;
+}
+
 .dripchat-input-box {
   position: fixed;
   bottom: 20px;
@@ -192,27 +225,4 @@ html, body {
   font-weight: bold;
   border: none;
   cursor: pointer;
-}
-
-.toggle-arrow-button {
-  position: absolute;
-  top: 28px;
-  left: 140px; /* Adjust based on DripSeek width */
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #00e6ff;
-  color: black;
-  font-weight: bold;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 0 5px rgba(0, 255, 255, 0.6);
-  z-index: 1000;
-  transition: background 0.2s, transform 0.2s;
-}
-
-.toggle-arrow-button:hover {
-  background-color: #00c2ff;
-  transform: scale(1.1);
 }

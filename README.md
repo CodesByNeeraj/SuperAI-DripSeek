@@ -2,6 +2,11 @@
 
 This project is a React.js web application that integrates with AWS Lambda serverless functions to provide advanced AI-powered features for product try-on and search.
 
+# Architecture Overview
+
+![Alt text](diagram_workflow.png)
+
+
 ## Features
 
 1. **AWS Lambda Serverless Functions**

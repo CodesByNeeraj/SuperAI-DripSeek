@@ -1,12 +1,35 @@
-# React + Vite
+# SuperAI-DripSeek
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a React.js web application that integrates with AWS Lambda serverless functions to provide advanced AI-powered features for product try-on and search.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. **AWS Lambda Serverless Functions**
+   - **Try On Studio**: Enables users to virtually try on products using AI models.
+   - **AWS Bedrock Rekognition**: Utilizes Amazon's Rekognition for image analysis.
+   - **API Model + Amazon Search API**: Integrates with Amazon's APIs to search for more products and enhance recommendations.
 
-## Expanding the ESLint configuration
+2. **Frontend**
+   - Built with React.js and Vite for fast development and hot module replacement.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Getting Started
+
+### Prerequisites
+- Node.js (v16 or higher recommended)
+- npm (comes with Node.js)
+
+### Installation & Running the App
+
+1. Install dependencies:
+   ```bash
+   npm i
+   ```
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+3. Open your browser and navigate to the local server URL (usually [http://localhost:5173](http://localhost:5173)).
+
+---
+
+For AWS Lambda and API integration, ensure you have the necessary AWS credentials and endpoints configured. Refer to the project documentation or contact the maintainer for backend deployment and environment setup.

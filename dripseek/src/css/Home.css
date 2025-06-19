@@ -112,9 +112,9 @@ html, body {
 }
 
 .search-results-section {
-  flex: 1;
-  min-height: 200px;
-  max-height: 50%;
+  flex: 0.75;
+  min-height: 150px;
+  max-height: 37.5%;
   overflow-y: auto;
   padding-right: 5px;
   margin-bottom: 10px;
@@ -122,9 +122,9 @@ html, body {
 }
 
 .try-on-section {
-  flex: 1;
-  min-height: 200px;
-  max-height: 50%;
+  flex: 1.25;
+  min-height: 250px;
+  max-height: 62.5%;
   overflow-y: auto;
   padding-right: 5px;
   padding-top: 10px;
@@ -224,6 +224,14 @@ html, body {
   color: black;
   font-weight: bold;
   font-size: 0.85rem;
+}
+
+.photo-button {
+  flex: 1;
+  width: 50%;
+  white-space: nowrap;
+  padding: 8px 0;
+  text-align: center;
 }
 
 .back-to-items-button {
@@ -410,22 +418,6 @@ html, body {
   margin-top: 8px;
 }
 
-.size-dropdown {
-  background-color: rgba(0, 194, 255, 0.15);
-  color: white;
-  border: 1px solid #00c2ff;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  outline: none;
-}
-
-.size-dropdown option {
-  background-color: #1a1a1a;
-  color: white;
-}
-
 .cart-item-controls {
   display: flex;
   flex-direction: column;
@@ -433,10 +425,17 @@ html, body {
   margin-top: 8px;
 }
 
-.cart-item-controls > div {
+.cart-inputs-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.size-selector, .quantity-selector {
   display: flex;
   align-items: center;
-  gap: 10px;
+  width: 100%;
 }
 
 .quantity-selector {
@@ -444,15 +443,24 @@ html, body {
   align-items: center;
 }
 
-.quantity-input {
+.size-dropdown, .quantity-input {
   background-color: rgba(0, 194, 255, 0.15);
   color: white;
   border: 1px solid #00c2ff;
   border-radius: 4px;
   padding: 4px 8px;
   font-size: 0.85rem;
-  width: 50px;
+  width: calc(100% - 48px);
   outline: none;
+}
+
+.size-dropdown {
+  cursor: pointer;
+}
+
+.size-dropdown option {
+  background-color: #1a1a1a;
+  color: white;
 }
 
 .size-guide {
@@ -489,15 +497,22 @@ html, body {
 
 /* Cart notification styles */
 .cart-notification {
-  background-color: rgba(0, 194, 255, 0.2);
+  position: absolute;
+  top: 120px;
+  left: 16px;
+  right: 16px;
+  background-color: rgba(0, 0, 0, 0.8);
   color: #00e6ff;
   border: 1px solid #00c2ff;
   border-radius: 6px;
-  padding: 8px 12px;
-  margin: 10px 0;
+  padding: 10px 16px;
   text-align: center;
   font-size: 0.9rem;
   animation: fadeIn 0.3s ease-in-out;
+  z-index: 1000;
+  box-shadow: 0 0 15px rgba(0, 194, 255, 0.3);
+  width: calc(100% - 64px);
+  margin: 0 auto;
 }
 
 .buy-now-button {

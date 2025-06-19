@@ -4,7 +4,7 @@ import { tryOn } from '../api/pixelcutTryOn';
 import { sendToRekogCropPerson } from '../api/rekogCrop';
 import { uploadToCloudinary } from'../api/uploadToCloudinary';
 import { tryOnStudio } from "../api/pixel"
-const DEFAULT_USER_IMAGE = 'https://res.cloudinary.com/dojig5luk/image/upload/v1750275979/h9lchhtlninxshu0sboa.jpg';
+const DEFAULT_USER_IMAGE = 'https://media1.popsugar-assets.com/files/thumbor/orwPFRMfswGPyPpwprzCtgOySk4/fit-in/1024x1024/filters:format_auto-!!-:strip_icc-!!-/2018/04/27/830/n/1922283/80683555056d8a80_MCDANMA_EC083/i/Scott-LangAnt-Man.jpg';
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const Home = () => {
@@ -65,10 +65,10 @@ const Home = () => {
       debugPreview.style.border = '2px solid red';
       debugPreview.style.background = 'white';
       debugPreview.style.padding = '5px';
-      debugPreview.innerHTML = `
-        <p>Screenshot Preview (removed in 5s)</p>
-        <img src="${imageData}" style="max-width: 200px; max-height: 200px;" />
-      `;
+      // debugPreview.innerHTML = `
+      //   <p>Screenshot Preview (removed in 5s)</p>
+      //   <img src="${imageData}" style="max-width: 200px; max-height: 200px;" />
+      // `;
       document.body.appendChild(debugPreview);
       setTimeout(() => document.body.removeChild(debugPreview), 5000);
       
@@ -301,6 +301,12 @@ const Home = () => {
 
         {/* Overlay Panel */}
         <div className={`drip-panel ${showPanel ? 'open' : ''}`}>
+          {/* Cart Notification - Inside panel */}
+          {cartNotification && (
+            <div className="cart-notification">
+              {cartNotification}
+            </div>
+          )}
           <div className="panel-header">
             <span className="powered-label">Powered by <strong>DripSeek AI</strong></span>
             <button
@@ -313,13 +319,6 @@ const Home = () => {
               🛒 DripCart
             </button>
           </div>
-          
-          {/* Cart Notification */}
-          {cartNotification && (
-            <div className="cart-notification">
-              {cartNotification}
-            </div>
-          )}
 
           {/* Cart or Items */}
           {activeTab === 'items' ? (
@@ -387,18 +386,16 @@ const Home = () => {
                 {/* Image Upload Section */}
                 <div className="photo-upload-section">
                   <h4 style={{ color: '#00c2ff', marginBottom: '10px' }}>Your Photo</h4>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between' }}>
                     <button 
-                      className="chat-button" 
+                      className="chat-button photo-button" 
                       onClick={() => fileInputRef.current.click()}
-                      style={{ flex: 1 }}
                     >
                       Upload New Photo
                     </button>
                     <button 
-                      className="chat-button" 
+                      className="chat-button photo-button" 
                       onClick={() => setUserImage(DEFAULT_USER_IMAGE)}
-                      style={{ flex: 1 }}
                     >
                       Use Default
                     </button>
@@ -486,33 +483,35 @@ const Home = () => {
                         </div>
                         {item.price && <p style={{ color: '#00c2ff', fontSize: '0.9rem' }}>{item.price}</p>}
                         <div className="cart-item-controls">
-                          <div className="size-selector">
-                            <label htmlFor={`size-${item.id}`} style={{ color: '#ccc', fontSize: '0.85rem', marginRight: '8px' }}>
-                              Size:
-                            </label>
-                            <select 
-                              id={`size-${item.id}`}
-                              value={itemSizes[item.id] || 'M'} 
-                              onChange={(e) => handleSizeChange(item.id, e.target.value)}
-                              className="size-dropdown"
-                            >
-                              {SIZES.map(size => (
-                                <option key={size} value={size}>{size}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="quantity-selector">
-                            <label htmlFor={`qty-${item.id}`} style={{ color: '#ccc', fontSize: '0.85rem', marginRight: '8px' }}>
-                              Qty:
-                            </label>
-                            <input
-                              id={`qty-${item.id}`}
-                              type="number"
-                              min="1"
-                              value={itemQuantities[item.id] || 1}
-                              onChange={(e) => handleQuantityChange(item.id, e.target.value)}
-                              className="quantity-input"
-                            />
+                          <div className="cart-inputs-row">
+                            <div className="size-selector">
+                              <label htmlFor={`size-${item.id}`} style={{ color: '#ccc', fontSize: '0.85rem', marginRight: '8px', width: '40px' }}>
+                                Size:
+                              </label>
+                              <select 
+                                id={`size-${item.id}`}
+                                value={itemSizes[item.id] || 'M'} 
+                                onChange={(e) => handleSizeChange(item.id, e.target.value)}
+                                className="size-dropdown"
+                              >
+                                {SIZES.map(size => (
+                                  <option key={size} value={size}>{size}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="quantity-selector">
+                              <label htmlFor={`qty-${item.id}`} style={{ color: '#ccc', fontSize: '0.85rem', marginRight: '8px', width: '40px' }}>
+                                Qty:
+                              </label>
+                              <input
+                                id={`qty-${item.id}`}
+                                type="number"
+                                min="1"
+                                value={itemQuantities[item.id] || 1}
+                                onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                                className="quantity-input"
+                              />
+                            </div>
                           </div>
                           <p className="size-guide" onClick={handleSizeGuideClick}>
                             <i>Click here for size guide</i>

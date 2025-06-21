@@ -6,6 +6,9 @@ This project is a React.js web application that integrates with AWS Lambda serve
 
 ![Alt text](diagram_workflow.png)
 
+# Video Demo
+
+[▶️ Watch the Demo Video](DripSeek%20Demo%20Vid.mp4)
 
 ## Features
 

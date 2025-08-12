@@ -1,6 +1,22 @@
+# 🏆 DripSeek – AI-Driven Fashion Discovery
+
+> **Top Honors — NEXT Hackathon, SuperAI Conference 2025 (Singapore)**  
+> Built in 36 hours. Real-time fashion discovery from streaming media.
+
+---
+
+# Project Highlights
+- **Hackathon:** Top 4 / 300+ applicants. https://www.superai.com/next-hackathon
+- **Prototype Time:** 36 hours
+- **Core Idea:** Browser plugin that identifies clothes on-screen and helps users shop similar looks with a virtual try-on (DripTry).
+
+---
 # SuperAI-DripSeek
 
 This project is a React.js web application that integrates with AWS Lambda serverless functions to provide advanced AI-powered features for product try-on and search.
+ - DripSeek is a browser plugin that identifies the clothes worn by actors in real time on streaming platforms such as Prime Video, allowing users to instantly shop for similar styles.
+- The DripTry feature enables customers to virtually test the fit before purchasing.
+- Inspired by DeepSeek, the name DripSeek reflects the vision of seamless, AI-driven fashion discovery.
 
 # Architecture Overview
 
